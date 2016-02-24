@@ -1,13 +1,35 @@
 var TodoLists = React.createClass({
+  getInitialState: function() {
+    return {data: []};
+  },
+
+  componentDidMount: function() {
+    this.loadFromServer();
+    setInterval(this.loadFromServer, this.props.pollInterval);
+  },
+
+  loadFromServer: function(){
+    $.ajax({
+      url: this.props.url,
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        this.setState({data: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+  },
+
   render: function() {
     return (
       <div>
-        <Todos data={this.props.data} />
+        <Todos data={this.state.data} />
       </div>
     );
   }
 });
-
 
 var Todo = React.createClass({
   render: function() {
@@ -19,7 +41,7 @@ var Todo = React.createClass({
 
 var Todos = React.createClass({
   render: function() {
-    var todosNodes = this.props.data.map(function(todo) {
+    var todoNodes = this.props.data.map(function(todo) {
       return (
         <Todo list = {todo.list} key = {todo.id}>
           {todo.done}
@@ -28,7 +50,7 @@ var Todos = React.createClass({
     });
     return (
       <div className="commentList">
-        {todosNodes}
+        {todoNodes}
       </div>
     );
   }
